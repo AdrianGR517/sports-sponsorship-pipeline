@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 def build_transform(df):
 
     REQUIRED_COLUMNS = {'deal_id', 'deal_name', 'sport_fact', 'branding_fact', 'team_competition',
-                        'industry', 'country', 'usd_value_total', 'usd_value_annual'}
+                        'length','industry', 'country', 'usd_value_total', 'usd_value_annual'}
 
     NUMERIC_COLS = {'usd_value_total', 'usd_value_annual'}
 
@@ -34,9 +34,10 @@ def build_transform(df):
     logger.info("Selecting only the relevant columns")
     
     df_transformed[['deal_name','deal_id','team_competition','usd_value_total','usd_value_annual']] = df[['deal_name','deal_id','team_competition','usd_value_total','usd_value_annual']]
-    df_transformed['sport_fact']         = df.sport_fact.fillna('Soccer').str.split(" | ",regex=False)
-    df_transformed['branding_fact']      = df.branding_fact.fillna('No branding').str.split(" | ",regex=False)
-    df_transformed['country']       = df["hq_buyer"].replace('', pd.NA).combine_first(df["hq_seller"]).dropna().str.split(" | ",regex=False)
+    df_transformed['length']            = df.length.astype(float)
+    df_transformed['sport_fact']        = df.sport_fact.fillna('Soccer').str.split(" | ",regex=False)
+    df_transformed['branding_fact']     = df.branding_fact.fillna('No branding').str.split(" | ",regex=False)
+    df_transformed['country']           = df["hq_buyer"].replace('', pd.NA).combine_first(df["hq_seller"]).dropna().str.split(" | ",regex=False)
 
     logger.info("Grouping the industries in categories")
 
