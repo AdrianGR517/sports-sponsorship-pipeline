@@ -10,16 +10,28 @@ ts = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 logger = logging.getLogger(__name__)
 
 
-def run_build(route, source = 'folder', out_dir = Path("out")):
-    out_dir.mkdir(parents=True, exist_ok=True)
+def run_build(route, source = 'folder', id_col = 'deal_id', out_dir = Path("out")):
+    out_path = out_dir / f"build_{ts}" 
+    out_path.mkdir(parents=True, exist_ok=True)
 
     # Pipeline
     dfs_loaded      = build_load(route=route, source=source)
-    df_merged       = build_merge(dfs_loaded)
+    df_merged       = build_merge(dfs_loaded, column_merge=id_col)
     df_transformed  = build_transform(df_merged)
 
-    out_file = out_dir / f"build_output_{ts}.csv" 
-    logger.info("Saving to %s", out_file)
-    df_transformed.to_csv(out_file, index=False)
-    logger.info("Data saved at %s", out_file)
-    return(out_file)
+    columns_to_explode = [c for c in df_transformed.columns if type(df_transformed.loc[0,c]) in (list, set)]
+    columns_main = [id_col] + [c for c in df_transformed.columns if c not in columns_to_explode and c != id_col]
+
+    logger.info("Saving to %s", out_path)
+
+    main_df = df_transformed[columns_main]
+    out_file_main = out_path / "main.csv"
+    main_df.to_csv(out_file_main, index=False)
+
+    for col in columns_to_explode:
+        bridge_df = df_transformed[[id_col,col]].explode(col)
+        out_file_bridge = out_path / f"bridge_{col}.csv"
+        bridge_df.to_csv(out_file_bridge, index=False)
+
+    logger.info("Data saved at %s", out_path)
+    return(out_path)

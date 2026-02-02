@@ -1,4 +1,4 @@
-from src.sponsoring.pipeline_build.transformations import industries_cluster_pipeline, explode_all
+from src.sponsoring.pipeline_build.transformations import industries_cluster_pipeline
 import pandas as pd
 import logging
 
@@ -44,8 +44,6 @@ def build_transform(df):
 
     logger.info("Removing the deals with zero usd_value_total")
 
-    df_transformed_not_null = df_transformed[df_transformed.usd_value_total > 0]
+    output_df = df_transformed[df_transformed.usd_value_total > 0]
     
-    output_df = explode_all(df_transformed_not_null[['deal_id', 'deal_name', 'sport_fact', 'branding_fact', 'team_competition',
-                                                     'industry', 'country', 'usd_value_total', 'usd_value_annual']])
     return(output_df)

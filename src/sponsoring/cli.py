@@ -32,6 +32,7 @@ def main_cb(
 def build(
     route: str = typer.Argument(..., help="Route of the parquet or csv data"),
     blob: bool = typer.Option(False, "--blob", help="Indicates that route is a azure storage blob url"),
+    id_col_name: str = typer.Option('deal_id', help="Common id column in the dataframes"),
     out_dir: Path = typer.Option(Path("out"), help="Output path"),
     log_level: str = typer.Option("INFO", "--log-level", help="Logging level"),
     ):
@@ -44,7 +45,8 @@ def build(
     out_file = run_build(
         route=route,
         source=source,
-        out_dir=out_dir
+        out_dir=out_dir,
+        id_col=id_col_name
     )
     return(out_file)
 

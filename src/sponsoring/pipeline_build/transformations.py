@@ -73,9 +73,3 @@ def industries_cluster_pipeline(col : pd.Series):
         ] if isinstance(lst, list) else lst
     )
     return(output.map(lambda x: set(x)))
-
-def explode_all(df):
-    df_exp = df.copy()
-    for c in df_exp.columns:
-        df_exp = df_exp.explode(c)
-    return(df_exp)
