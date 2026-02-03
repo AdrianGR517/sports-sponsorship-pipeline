@@ -14,7 +14,8 @@ def analyze_usd_by_industry_and_country(df : pd.DataFrame):
     df
     .groupby(["country","industry"], as_index=False)
     .agg(average_annual_amount=("usd_value_annual","mean"),
-    total_usd_amount=("usd_value_total","sum"))
+    total_usd_amount=("usd_value_total","sum"),
+    total_deals= ('deal_id','count'))
 )
 
     return(usd_by_country_and_industry)
