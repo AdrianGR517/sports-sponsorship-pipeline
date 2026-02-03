@@ -52,10 +52,8 @@ def build(
 
 @app.command()
 def analyze(
-    path: str = typer.Argument(..., help="Route of the parquet or csv data"),
-    competition: str | None = typer.Option(None, "--competition", help="Team competition to filter by, disabled by default"),
-    branding: str | None = typer.Option(None, "--branding", help="Team branding to filter by, disabled by default"),
-    sport: str | None = typer.Option(None, "--sport", help="Team sport to filter by, disabled by default"),
+    path: str = typer.Argument(..., help="Route of the csv build outputs"),
+    id_col : str = typer.Option('deal_id', help="Name of the deal id column"),
     out_dir : Path = typer.Option(Path("out"), help="Output path"),
     log_level: str = typer.Option("INFO", "--log-level", help="Logging level")
     ):
@@ -65,9 +63,7 @@ def analyze(
     
     run_analyze(
         path=path,
-        competition=competition,
-        branding=branding,
-        sport=sport,
+        id_col=id_col,
         out_dir=out_dir
     )
 
@@ -75,4 +71,4 @@ def analyze(
 
 def main():
     # app init
-    app(prog_name="example-package")
+    app(prog_name="sponsoring")

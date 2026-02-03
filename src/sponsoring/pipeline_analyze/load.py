@@ -5,22 +5,32 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
-def analyze_load(path_str : str):
+def analyze_load(path_str : str, id_col : str = 'deal_id'):
 
     path = Path(path_str)
 
     if not path.exists():
-        raise typer.BadParameter(f"File {path_str} not found")
+        raise typer.BadParameter(f"Folder {path_str} not found")
     
-    extension = path_str.split('.')[-1]
+    if not (path / 'main.csv').exists():
+        raise typer.BadParameter(f"File {path_str}/main.csv not found")
+    if not (path / 'bridge_branding.csv').exists():
+        raise typer.BadParameter(f"File {path_str}/bridge_branding.csv not found")
+    if not (path / 'bridge_country.csv').exists():
+        raise typer.BadParameter(f"File {path_str}/bridge_country.csv not found")
+    if not (path / 'bridge_industry.csv').exists():
+        raise typer.BadParameter(f"File {path_str}/bridge_industry.csv not found")
 
-    if extension == 'parquet':
-        df = pd.read_parquet(path_str)
+    main_df = pd.read_csv(path_str + '/main.csv')
+    bridge_branding_df = pd.read_csv(path_str + '/bridge_branding.csv')
+    bridge_country_df  = pd.read_csv(path_str + '/bridge_country.csv')
+    bridge_industry_df = pd.read_csv(path_str + '/bridge_industry.csv')
 
-    elif extension == 'csv':
-        df = pd.read_csv(path_str)
+    analyze_df = (
+        main_df
+        .merge(bridge_branding_df, on=id_col, how="inner")
+        .merge(bridge_country_df, on=id_col, how="inner")
+        .merge(bridge_industry_df, on=id_col, how="inner")
+        )
 
-    else:
-        raise typer.BadParameter("File must be in .parquet or .csv format")
-    
-    return(df)
+    return(analyze_df)
