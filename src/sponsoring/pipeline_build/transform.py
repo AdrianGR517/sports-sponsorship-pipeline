@@ -7,10 +7,10 @@ logger = logging.getLogger(__name__)
 
 def build_transform(df):
 
-    REQUIRED_COLUMNS = {'deal_id', 'deal_name', 'sport_fact', 'branding_fact', 'team_competition',
-                        'length','industry', 'country', 'usd_value_total', 'usd_value_annual'}
+    REQUIRED_COLUMNS = {'deal_id','brand_name','team_name','industry','hq_seller','hq_buyer','team_competition',
+                        'branding_fact','status','partnership_type','length','usd_value_annual','usd_value_total'}
 
-    NUMERIC_COLS = {'usd_value_total', 'usd_value_annual'}
+    NUMERIC_COLS = {'length','usd_value_total', 'usd_value_annual'}
 
     missing = REQUIRED_COLUMNS - set(df.columns)
     if missing:
@@ -29,22 +29,25 @@ def build_transform(df):
                 f"Column '{col}' must contain numeric values"
             )
 
+    logger.info("Cleaning the outliers")
+
+    df0 = df[df['usd_value_total'] > 0]
+    df1 = df0[df0['usd_value_annual'] < 1e10]
+
     df_transformed = pd.DataFrame()
 
     logger.info("Selecting only the relevant columns")
     
-    df_transformed[['deal_name','deal_id','team_competition','usd_value_total','usd_value_annual']] = df[['deal_name','deal_id','team_competition','usd_value_total','usd_value_annual']]
-    df_transformed['length']            = df.length.astype(float)
-    df_transformed['sport_fact']        = df.sport_fact.fillna('Soccer').str.split(" | ",regex=False)
-    df_transformed['branding_fact']     = df.branding_fact.fillna('No branding').str.split(" | ",regex=False)
-    df_transformed['country']           = df["hq_buyer"].replace('', pd.NA).combine_first(df["hq_seller"]).dropna().str.split(" | ",regex=False)
-
+    df_transformed[['deal_id','brand_name','team_name','deal_type','deal_status','length']] = (
+    df1[['deal_id','brand_name','team_name','partnership_type','status','length']]
+    )
+    df_transformed['branding']      = df1.branding_fact.fillna('No branding').str.split(" | ",regex=False)
+    df_transformed['competition']   = df1.team_competition
+    df_transformed['industry']      = industries_cluster_pipeline(df1.industry)
+    df_transformed['country']       = df1["hq_buyer"].replace('', pd.NA).combine_first(df1["hq_seller"]).dropna().str.split(" | ",regex=False)
+    df_transformed[['usd_value_annual','usd_value_total']]      = df1[['usd_value_annual','usd_value_total']]
     logger.info("Grouping the industries in categories")
 
-    df_transformed['industry']      = industries_cluster_pipeline(df.industry)
-
-    logger.info("Removing the deals with zero usd_value_total")
-
-    output_df = df_transformed[df_transformed.usd_value_total > 0]
+    df_transformed['industry']      = industries_cluster_pipeline(df1.industry)
     
-    return(output_df)
+    return(df_transformed)

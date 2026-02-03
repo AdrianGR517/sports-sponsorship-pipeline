@@ -2,7 +2,8 @@ from src.sponsoring.pipeline_build.load import build_load
 from src.sponsoring.pipeline_build.merge import build_merge
 from src.sponsoring.pipeline_build.transform import build_transform
 from pathlib import Path
-from datetime import datetime   
+from datetime import datetime
+import pandas as pd
 import logging
 
 ts = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
@@ -32,6 +33,17 @@ def run_build(route, source = 'folder', id_col = 'deal_id', out_dir = Path("out"
         bridge_df = df_transformed[[id_col,col]].explode(col)
         out_file_bridge = out_path / f"bridge_{col}.csv"
         bridge_df.to_csv(out_file_bridge, index=False)
+
+
+    # Creating the country-industry bridge table
+    
+    country_industry_df = df_transformed[['deal_id','country','industry']].explode('country').explode('industry')
+
+    bridge_country_industry_df = pd.DataFrame()
+    bridge_country_industry_df['deal_id']           = country_industry_df.deal_id
+    bridge_country_industry_df['country-industry']  = country_industry_df.country + ' - ' + country_industry_df.industry
+
+    bridge_country_industry_df.to_csv(out_path / 'bridge_country_industry.csv', index=False)
 
     logger.info("Data saved at %s", out_path)
     return(out_path)
