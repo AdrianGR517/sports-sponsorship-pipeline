@@ -28,6 +28,7 @@ pyarrow = "*"
 regex = "*"
 scikit-learn = "*"
 sentence-transformers = "*"
+datasets = ">=2.20.0"
 
 
 [tool.pixi.pypi-dependencies]
