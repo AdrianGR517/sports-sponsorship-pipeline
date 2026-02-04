@@ -29,6 +29,8 @@ regex = "*"
 scikit-learn = "*"
 sentence-transformers = "*"
 datasets = ">=2.20.0"
+HDBSCAN = "*"
+matplotlib = "*"
 
 
 [tool.pixi.pypi-dependencies]

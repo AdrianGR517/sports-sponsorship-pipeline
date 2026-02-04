@@ -31,8 +31,8 @@ def build_transform(df):
 
     logger.info("Cleaning the outliers")
 
-    df0 = df[df['usd_value_total'] > 0]
-    df1 = df0[df0['usd_value_annual'] < 1e10]
+    df0 = df[(df['usd_value_total'] > 0) & (df['usd_value_total'] < 1E12)]
+    df1 = df0[df0['usd_value_annual'] < 1E10]
 
     df_transformed = pd.DataFrame()
 
